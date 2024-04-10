@@ -23,6 +23,8 @@ namespace SnakeXenzia
 
         private SolidColorBrush snakeBodyColor = Brushes.Green;
         private SolidColorBrush snakeHeadColor = Brushes.YellowGreen;
+        private SolidColorBrush snakeFoodColor = Brushes.Red;
+        private UIElement? snakeFood = null;
         private List<SnakePart> snakeParts = [];
         private System.Windows.Threading.DispatcherTimer gameTickTimer = new();
 
@@ -166,9 +168,68 @@ namespace SnakeXenzia
 
             // Draw the snake  
             DrawSnake();
+            DrawSnakeFood();
 
             // Enable the timer        
             gameTickTimer.IsEnabled = true;
+        }
+
+        private void DrawSnakeFood()
+        {
+            Point foodPosition = GetNextFoodPosition();
+            snakeFood = new Ellipse()
+            {
+                Width = SnakeSquareSize,
+                Height = SnakeSquareSize,
+                Fill = snakeFoodColor
+            };
+
+            GameArea.Children.Add(snakeFood);
+            Canvas.SetTop(snakeFood, foodPosition.Y);
+            Canvas.SetLeft(snakeFood, foodPosition.X);
+        }
+
+        private Point GetNextFoodPosition()
+        {
+            /*  Idea: we will generate random position not exceeding the GameArea. Also, the position should not be occupied by any of the snake parts.
+             *  Also, the position should be the multiple of SnakeSquareSize(20). Means, it should be 0, 20, 40, 60,... and so on upto the GameArea limit.
+             *  To do so, we will divide the GameArea height or width by the SnakeSquareSize(20). 
+             *  And then will generate random number between the divided result.
+             *  After that we will multiply the random number with SnakeSquareSize(20). In this way we can get any number from 0,20,40,60,... and so on.
+             */
+
+            var occupiedPosition_X = new HashSet<double>();
+            var occupiedPosition_Y = new HashSet<double>();
+
+            foreach(var snakePart in snakeParts)
+            {
+                occupiedPosition_X.Add(snakePart.Position.X);
+                occupiedPosition_Y.Add(snakePart.Position.Y);
+            }
+
+            var rnd = new Random();
+            double random_X = -1;
+            double random_Y = -1;
+            var maxValue = -1;
+
+            // Keep finding position if the position is occupied by the snakeParts
+            while((random_X == -1 || occupiedPosition_X.Contains(random_X))
+                && (random_Y == -1 || occupiedPosition_Y.Contains(random_Y)))
+            {
+                maxValue = (int)(GameArea.ActualWidth / SnakeSquareSize);
+                random_X = rnd.Next(maxValue) * SnakeSquareSize;
+
+                maxValue = (int)(GameArea.ActualHeight / SnakeSquareSize);
+                random_Y = rnd.Next(maxValue) * SnakeSquareSize;
+            }
+
+            
+            return new Point()
+            {
+                X = random_X,
+                Y = random_Y
+            };
+
         }
     }
 
