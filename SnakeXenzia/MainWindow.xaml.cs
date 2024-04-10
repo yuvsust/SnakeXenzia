@@ -41,7 +41,6 @@ namespace SnakeXenzia
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             DrawGameArea();
-            StartNewGame();
         }
 
         private void DrawGameArea()
@@ -161,6 +160,9 @@ namespace SnakeXenzia
 
         private void StartNewGame()
         {
+            GameArea.Children.Clear();
+            DrawGameArea();
+
             snakeLength = SnakeStartLength;
             snakeDirection = Direction.Right;
             snakeParts.Add(new SnakePart() { Position = new Point(SnakeSquareSize * 5, SnakeSquareSize * 5) });
@@ -230,6 +232,46 @@ namespace SnakeXenzia
                 Y = random_Y
             };
 
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            var previousSnakeDirection = snakeDirection;
+            switch(e.Key)
+            {
+                case Key.Up:
+                    if(snakeDirection != Direction.Down)
+                    {
+                        snakeDirection = Direction.Up;
+                    }
+                    break;
+                case Key.Down:
+                    if (snakeDirection != Direction.Up)
+                    {
+                        snakeDirection = Direction.Down;
+                    }
+                    break;
+                case Key.Left:
+                    if (snakeDirection != Direction.Right)
+                    {
+                        snakeDirection = Direction.Left;
+                    }
+                    break;
+                case Key.Right:
+                    if (snakeDirection != Direction.Left)
+                    {
+                        snakeDirection = Direction.Right;
+                    }
+                    break;
+                case Key.Space:
+                    StartNewGame();
+                    break;
+            }
+
+            if(previousSnakeDirection != snakeDirection)
+            {
+                MoveSnake();
+            }
         }
     }
 
